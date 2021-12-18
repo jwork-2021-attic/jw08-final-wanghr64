@@ -1,6 +1,8 @@
 package java2021.world;
 
-public class Bullet implements Runnable {
+import java.io.Serializable;
+
+public class Bullet extends Thread implements Serializable {
 
     Bullet(World world, int direction, int x, int y) {
         this.world = world;

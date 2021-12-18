@@ -18,12 +18,13 @@
 package java2021.world;
 
 import java.awt.Color;
+import java.io.Serializable;
 
 /**
  *
  * @author Aeranythe Echosong
  */
-public class Creature {
+public class Creature implements Serializable {
 
     private World world;
 
@@ -71,6 +72,10 @@ public class Creature {
 
     public void setAI(CreatureAI ai) {
         this.ai = ai;
+    }
+
+    public void startAI() {
+        this.ai.start();
     }
 
     private int maxHP;

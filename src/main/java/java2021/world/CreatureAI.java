@@ -18,12 +18,13 @@
 package java2021.world;
 
 import java.awt.Point;
+import java.io.Serializable;
 
 /**
  *
  * @author Aeranythe Echosong
  */
-abstract class CreatureAI implements Runnable {
+abstract class CreatureAI extends Thread implements Serializable {
 
     protected Creature creature;
     protected World world;

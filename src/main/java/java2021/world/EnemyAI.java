@@ -1,5 +1,6 @@
 package java2021.world;
 
+import java.io.Serializable;
 import java.util.*;
 
 public abstract class EnemyAI extends CreatureAI {
@@ -75,7 +76,7 @@ public abstract class EnemyAI extends CreatureAI {
         route.pollFirst();
     }
 
-    protected class Point {
+    protected class Point implements Serializable {
         int x;
         int y;
 

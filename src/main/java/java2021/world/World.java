@@ -1,6 +1,7 @@
 package java2021.world;
 
 import java.awt.Color;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,7 +28,7 @@ import java.util.concurrent.*;
  *
  * @author Aeranythe Echosong
  */
-public class World {
+public class World implements Serializable {
 
     private Tile[][] tiles;
     private int width;

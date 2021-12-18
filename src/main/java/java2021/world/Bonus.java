@@ -1,6 +1,8 @@
 package java2021.world;
 
-public class Bonus {
+import java.io.Serializable;
+
+public class Bonus implements Serializable {
 
     public Bonus(World world, int type) {
         this.world = world;
