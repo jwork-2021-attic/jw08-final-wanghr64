@@ -28,7 +28,7 @@ import java.util.*;
  *
  * @author Aeranythe Echosong
  */
-public class PlayScreen implements Screen, Serializable {
+public class PlayScreen implements Screen, Serializable, Runnable {
 
     private World world;
     private Player player;
@@ -46,18 +46,11 @@ public class PlayScreen implements Screen, Serializable {
         return this.world;
     }
 
-    public PlayScreen() {
-        this.screenWidth = 38;
-        this.screenHeight = 15;
-        createWorld();
-        this.messages = new ArrayList<String>();
-        this.oldMessages = new ArrayList<String>();
-
-        createCreatures();
-        createBonusus();
-
-        new Thread(() -> {
-            while (true) {
+    @Override
+    public void run() {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
                 for (int i = 1; i < 7; ++i)
                     if (player.curCoolTime[i] < player.maxCoolTime[i])
                         ++player.curCoolTime[i];
@@ -66,17 +59,18 @@ public class PlayScreen implements Screen, Serializable {
                 } catch (Exception e) {
                 }
             }
-        }).start();
+        }, 0, 1000);
 
-        new Thread(() -> {
-            while (true) {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
                 Random rd = new Random();
                 if (rd.nextInt(2) == 0) {
-                    Creature enemy = new Creature(this.world, (char) 15, AsciiPanel.fromPic, 15, 20, 5, 9);
+                    Creature enemy = new Creature(world, (char) 15, AsciiPanel.fromPic, 15, 20, 5, 9);
                     new Thread(new BulletEnemyAI(enemy, world, player)).start();
                     world.addAtEmptyLocation(enemy);
                 } else {
-                    Creature enemy = new Creature(this.world, (char) 15, AsciiPanel.fromPic, 1, 20, 5, 9);
+                    Creature enemy = new Creature(world, (char) 15, AsciiPanel.fromPic, 1, 20, 5, 9);
                     new Thread(new BombEnemyAI(enemy, world, player)).start();
                     world.addAtEmptyLocation(enemy);
                 }
@@ -93,7 +87,18 @@ public class PlayScreen implements Screen, Serializable {
                 } catch (Exception e) {
                 }
             }
-        }).start();
+        }, 5000, 5000);
+    }
+
+    public PlayScreen() {
+        this.screenWidth = 38;
+        this.screenHeight = 15;
+        createWorld();
+        this.messages = new ArrayList<String>();
+        this.oldMessages = new ArrayList<String>();
+
+        createCreatures();
+        createBonusus();
     }
 
     private void createCreatures() {

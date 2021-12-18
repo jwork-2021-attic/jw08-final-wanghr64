@@ -36,6 +36,7 @@ public class LoadScreen extends SaveLoadScreen {
                             b.start();
                         for (Creature c : ps.world().getCreatures())
                             c.startAI();
+                        new Thread(ps).start();
                         return ps;
                     } catch (Exception e) {
                         System.out.println(e);
