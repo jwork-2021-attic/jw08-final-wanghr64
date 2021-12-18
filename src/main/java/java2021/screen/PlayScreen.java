@@ -21,13 +21,14 @@ import java2021.world.*;
 import java2021.asciiPanel.AsciiPanel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
+import java.io.Serializable;
 import java.util.*;
 
 /**
  *
  * @author Aeranythe Echosong
  */
-public class PlayScreen implements Screen {
+public class PlayScreen implements Screen, Serializable {
 
     private World world;
     private Player player;
@@ -40,6 +41,10 @@ public class PlayScreen implements Screen {
     private int iCurAI;
     private int preDirect;
     private Date preMessageClearTime;
+
+    public World world() {
+        return this.world;
+    }
 
     public PlayScreen() {
         this.screenWidth = 38;
@@ -412,8 +417,9 @@ public class PlayScreen implements Screen {
                     player.skill();
                     player.curCoolTime[iCurAI] -= player.costCoolTime[iCurAI];
                 }
-
                 break;
+            case KeyEvent.VK_ESCAPE:
+                return new SaveScreen(this);
         }
 
         return this;

@@ -74,10 +74,10 @@ public class StartScreen extends RestartScreen {
                     case 2:
                         return hs;
                 }
-            case KeyEvent.VK_DOWN:
+            case KeyEvent.VK_S:
                 selected = (selected + 1) % 3;
                 return this;
-            case KeyEvent.VK_UP:
+            case KeyEvent.VK_W:
                 selected = (selected - 1) % 3;
                 return this;
             default:
