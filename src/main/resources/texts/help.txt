@@ -1,0 +1,84 @@
+to Move:
+    use the 4 direction KEYs.
+
+to Attack:
+    Press 'C'
+
+to OK:
+    Press 'Z'
+
+to cancel:
+    Press 'X'
+
+Find your lovely 7 gourd kids and beat the monster!
+
+
+
+
+
+
+
+
+
+
+Powered by Java & asciiPanel
+
+Made by wanghr-191220107 
+
+
+
+
+
+
+
+
+ 
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+           ..                                               
+           .O.                                              
+          ...Z7ZO.. .                                       
+          . $ .. .?..                                       
+          ..8  . .,...                                      
+          ..,.   ,DNN8                                      
+          ..... D......O..                                  
+           .. ,7.      .+     . . . .   ..                  
+          . O.Z ..     .$ ...DNNMMMMNMNMD$.                 
+     .D=....DN.    ....,MMMMMMMMMMMMNMMNNNMMM= ...          
+     DOZZZOOD7.    ..$NNNMNMMMMMMMMMNMMMMNNNMMMN .          
+  . =O8$OOZ88:   ..,NNNMMMMMMMNNMMMMMMMMNNMMNMMMN=..        
+  ..D$O8ZOZZ8:....NNMNMMMNMNMMMNMN+~:+MN.        .I..       
+  .7O8$OZZOZDO..=DMNMNMMMMMN= .. .. .... .      ..,..       
+ . ZIZZOO$$N8N:,MMNNMMNMO,..                     ..Z.       
+ . ?8ZO8$DD88DNMMMNMD~. . ..                     . ..       
+  ...+O8NOO888MMMM7                                 I       
+   ...I8OOO$ZNNMNN ..                              .I       
+     N$ZO88O8MMMM$..                              ..:.      
+    .ZOOOZZZNMMMND.                       ..   .  ..8~.     
+   .=ZOOO8OONMMMNN.                       . .,,  +,O$=.     
+  ..DOOOOZ88NNNNMN.  . ...      ....  ..  ..NN...I~:+=      
+   .8OOOZOODNNNNMM.  ..I .      INN$  ... .ZMO....~N =      
+   .88$OOO8DMMNNNN    ..+: 7.    :NN~. ,Z=7M.  .~MNN ~      
+   7$$$8$O88NNMMNM, .  .7N.. . ....$NO.7DN,. .?NN..N.=.     
+   D$O7878ODMNNNMN+..  . ONM8...... .. ,.. :NNNNM7.Z: ..    
+  . .88O7O$NNMMNNNO     .., NNMMNNND?     .:?7NNNN ?,~.     
+  .. . . . .NN7INNN.     .Z... NNNNM,     .=.NINMN...=.     
+          . NN7I$NN .    .I ..DNNMN8     . + DDNND8..Z..    
+            =N$7+MN+    ...=. $INND.~    ..Z.~NDDN.  $      
+          . .ND?DDNO       ?..DNNND O   .:.? .D7  .  7 .    
+            .7N7?NNN        =+NNND$.O . ..=:=.       7 .O.  
+            . NO7$NN      . ...=OI=.....:D+...       $.OM.  
+          .   +NIDNN:                  .    ..      .DNNN   
+           O...NZIDNI                  .:NDD ..    .:NNNN.  
+          +N7. INZ$NN              ...$=.. ...    ..NNNNM   
+          .NN8.+NNNNN..            .,8..         ..8NNM=.   
+           .NMNNMMMMN,.             ~..           +NN=...   
+           7MNNNNNNNNI.                         .+7         
+            8NNNNNNNNN..                         .. .       
+            ...IDNNMMN  .                     ..            
+            . .. ..  ..7N:                  ....            
+                         .... ......    ..  .               
