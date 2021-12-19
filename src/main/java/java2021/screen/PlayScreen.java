@@ -35,12 +35,12 @@ public class PlayScreen implements Screen, Serializable, Runnable {
     private int screenWidth;
     private int screenHeight;
     private List<String> messages;
-    private List<String> oldMessages;
+    // private List<String> oldMessages;
     private PlayerAI[] myAIs;
 
     private int iCurAI;
     private int preDirect;
-    private Date preMessageClearTime;
+    // private Date preMessageClearTime;
 
     public World world() {
         return this.world;
@@ -95,7 +95,7 @@ public class PlayScreen implements Screen, Serializable, Runnable {
         this.screenHeight = 15;
         createWorld();
         this.messages = new ArrayList<String>();
-        this.oldMessages = new ArrayList<String>();
+        // this.oldMessages = new ArrayList<String>();
 
         createCreatures();
         createBonusus();
@@ -298,20 +298,22 @@ public class PlayScreen implements Screen, Serializable, Runnable {
                 break;
         }
     }
-
-    private void displayMessages(AsciiPanel terminal, List<String> messages) {
-        if (preMessageClearTime == null)
-            preMessageClearTime = new Date();
-        int top = Math.max(this.screenHeight - messages.size(), this.screenHeight - 3);
-        for (int i = 0; i < messages.size() && i < 3; i++) {
-            terminal.write(messages.get(i), 1, top - i + 1);
-        }
-        this.oldMessages.addAll(messages);
-        if (new Date().getTime() - preMessageClearTime.getTime() > 2000) {
-            messages.clear();
-            preMessageClearTime = null;
-        }
-    }
+    /*
+     * private void displayMessages(AsciiPanel terminal, List<String> messages) {
+     * if (preMessageClearTime == null)
+     * preMessageClearTime = new Date();
+     * int top = Math.max(this.screenHeight - messages.size(), this.screenHeight -
+     * 3);
+     * for (int i = 0; i < messages.size() && i < 3; i++) {
+     * terminal.write(messages.get(i), 1, top - i + 1);
+     * }
+     * this.oldMessages.addAll(messages);
+     * if (new Date().getTime() - preMessageClearTime.getTime() > 2000) {
+     * messages.clear();
+     * preMessageClearTime = null;
+     * }
+     * }
+     */
 
     @Override
     public void displayOutput(AsciiPanel terminal) {
