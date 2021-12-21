@@ -34,13 +34,6 @@ public class PlayScreen implements Screen, Serializable, Runnable {
     private Player player;
     private int screenWidth;
     private int screenHeight;
-    private List<String> messages;
-    // private List<String> oldMessages;
-    private PlayerAI[] myAIs;
-
-    private int iCurAI;
-    private int preDirect;
-    // private Date preMessageClearTime;
 
     public World world() {
         return this.world;
@@ -94,8 +87,6 @@ public class PlayScreen implements Screen, Serializable, Runnable {
         this.screenWidth = 38;
         this.screenHeight = 15;
         createWorld();
-        this.messages = new ArrayList<String>();
-        // this.oldMessages = new ArrayList<String>();
 
         createCreatures();
         createBonusus();
@@ -104,25 +95,15 @@ public class PlayScreen implements Screen, Serializable, Runnable {
     private void createCreatures() {
         player = new Player(this.world, (char) 138, AsciiPanel.fromPic, 100, 20, 10, 9);
         world.addAtEmptyLocation(player);
-        myAIs = new PlayerAI[7];
-        myAIs[0] = new OldManAI(player, world, messages);
-        myAIs[1] = new PowerBrotherAI(player, world, messages);
-        myAIs[2] = new ViewBrotherAI(player, world, messages);
-        myAIs[3] = new FireBrotherAI(player, world, messages);
-        myAIs[4] = new WaterBrotherAI(player, world, messages);
-        myAIs[5] = new SteelBrotherAI(player, world, messages);
-        myAIs[6] = new HideBrotherAI(player, world, messages);
-        iCurAI = 0;
-        player.setAI(myAIs[iCurAI]);
 
         for (int i = 0; i < 10; ++i) {
-            Creature enemy = new Creature(this.world, (char) 15, AsciiPanel.fromPic, 15, 20, 5, 9);
-            new Thread(new BulletEnemyAI(enemy, world, player)).start();
+            Creature enemy = new Creature(this.world, (char) 15, AsciiPanel.fromPic, 1, 20, 1, 9);
+            new Thread(new BulletEnemyAI(enemy, world, player));
             world.addAtEmptyLocation(enemy);
         }
         for (int i = 0; i < 10; ++i) {
-            Creature enemy = new Creature(this.world, (char) 15, AsciiPanel.fromPic, 1, 20, 5, 9);
-            new Thread(new BombEnemyAI(enemy, world, player)).start();
+            Creature enemy = new Creature(this.world, (char) 15, AsciiPanel.fromPic, 1, 20, 1, 9);
+            new Thread(new BombEnemyAI(enemy, world, player));
             world.addAtEmptyLocation(enemy);
         }
     }
@@ -204,9 +185,9 @@ public class PlayScreen implements Screen, Serializable, Runnable {
     }
 
     private void displaySkill(AsciiPanel terminal) {
-        switch (iCurAI) {
+        switch (player.iCurAI) {
             case 1:
-                switch (preDirect) {
+                switch (player.preDirect) {
                     case KeyEvent.VK_LEFT:
                         terminal.write("*", player.x() - getScrollX() - 1, player.y() - getScrollY(), Color.RED);
                         break;
@@ -224,7 +205,7 @@ public class PlayScreen implements Screen, Serializable, Runnable {
             case 2:
                 break;
             case 3:
-                switch (preDirect) {
+                switch (player.preDirect) {
                     case KeyEvent.VK_LEFT:
                         for (int i = 1; i < 6 && player.x() - getScrollX() - i >= 0
                                 && world.tile(player.x() - i, player.y()) != Tile.WALL; ++i)
@@ -346,7 +327,7 @@ public class PlayScreen implements Screen, Serializable, Runnable {
         if (player.validAIs[6])
             terminal.write((char) 149, 26, 19, AsciiPanel.fromPic);
 
-        switch (iCurAI) {
+        switch (player.iCurAI) {
             case 1:
                 terminal.write('*', 3, 18, AsciiPanel.red);
                 break;
@@ -379,28 +360,27 @@ public class PlayScreen implements Screen, Serializable, Runnable {
         switch (key.getKeyCode()) {
             case KeyEvent.VK_A:
                 player.moveBy(-1, 0);
-                preDirect = KeyEvent.VK_LEFT;
+                player.preDirect = KeyEvent.VK_LEFT;
                 break;
             case KeyEvent.VK_D:
                 player.moveBy(1, 0);
-                preDirect = KeyEvent.VK_RIGHT;
+                player.preDirect = KeyEvent.VK_RIGHT;
                 break;
             case KeyEvent.VK_W:
                 player.moveBy(0, -1);
-                preDirect = KeyEvent.VK_UP;
+                player.preDirect = KeyEvent.VK_UP;
                 break;
             case KeyEvent.VK_S:
                 player.moveBy(0, 1);
-                preDirect = KeyEvent.VK_DOWN;
+                player.preDirect = KeyEvent.VK_DOWN;
                 break;
             case KeyEvent.VK_Q:
                 if (!player.onSkill()) {
-                    iCurAI = iCurAI == 0 ? 6 : iCurAI - 1;
-                    while (!player.validAIs[iCurAI])
-                        iCurAI = iCurAI == 0 ? 6 : iCurAI - 1;
-                    player.setAI(myAIs[iCurAI]);
-                    if (iCurAI != 0)
-                        player.setGlyph((char) (144 + iCurAI - 1));
+                    player.iCurAI = player.iCurAI == 0 ? 6 : player.iCurAI - 1;
+                    while (!player.validAIs[player.iCurAI])
+                        player.iCurAI = player.iCurAI == 0 ? 6 : player.iCurAI - 1;
+                    if (player.iCurAI != 0)
+                        player.setGlyph((char) (144 + player.iCurAI - 1));
                     else
                         player.setGlyph((char) 138);
                 }
@@ -408,21 +388,20 @@ public class PlayScreen implements Screen, Serializable, Runnable {
                 break;
             case KeyEvent.VK_E:
                 if (!player.onSkill()) {
-                    iCurAI = (iCurAI + 1) % 7;
-                    while (!player.validAIs[iCurAI])
-                        iCurAI = (iCurAI + 1) % 7;
-                    player.setAI(myAIs[iCurAI]);
-                    if (iCurAI != 0)
-                        player.setGlyph((char) (144 + iCurAI - 1));
+                    player.iCurAI = (player.iCurAI + 1) % 7;
+                    while (!player.validAIs[player.iCurAI])
+                        player.iCurAI = (player.iCurAI + 1) % 7;
+                    if (player.iCurAI != 0)
+                        player.setGlyph((char) (144 + player.iCurAI - 1));
                     else
                         player.setGlyph((char) 138);
                 }
                 // player.setColor(Player.id2Color(iCurAI));}
                 break;
             case KeyEvent.VK_J:
-                if (player.curCoolTime[iCurAI] >= player.costCoolTime[iCurAI]) {
+                if (player.curCoolTime[player.iCurAI] >= player.costCoolTime[player.iCurAI]) {
                     player.skill();
-                    player.curCoolTime[iCurAI] -= player.costCoolTime[iCurAI];
+                    player.curCoolTime[player.iCurAI] -= player.costCoolTime[player.iCurAI];
                 }
                 break;
             case KeyEvent.VK_ESCAPE:
