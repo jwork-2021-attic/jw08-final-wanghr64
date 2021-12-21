@@ -26,6 +26,8 @@ import java.io.Serializable;
  */
 public class Creature implements Serializable {
 
+    public int preDirect;
+
     private World world;
 
     private int x;
@@ -164,6 +166,7 @@ public class Creature implements Serializable {
 
         boolean killed = other.modifyHP(-damage);
 
+        System.out.print("attacked");
         this.notify("You attack the '%s' for %d damage.", other.glyph, damage);
         other.notify("The '%s' attacks you for %d damage.", glyph, damage);
 
