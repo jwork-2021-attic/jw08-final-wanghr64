@@ -70,6 +70,7 @@ public class StartScreen extends RestartScreen {
                     case 0:
                         PlayScreen ps = new PlayScreen();
                         new Thread(ps).start();
+                        return ps;
                     case 1:
                         return new LoadScreen(this);
                     case 2:
