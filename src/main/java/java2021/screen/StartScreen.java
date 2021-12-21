@@ -68,17 +68,20 @@ public class StartScreen extends RestartScreen {
             case KeyEvent.VK_ENTER:
                 switch (this.selected) {
                     case 0:
-                        return new PlayScreen();
+                        PlayScreen ps = new PlayScreen();
+                        new Thread(ps).start();
                     case 1:
                         return new LoadScreen(this);
                     case 2:
+                        return new ServerSelectScreen();
+                    case 3:
                         return hs;
                 }
             case KeyEvent.VK_S:
-                selected = (selected + 1) % 3;
+                selected = (selected + 1) % 4;
                 return this;
             case KeyEvent.VK_W:
-                selected = (selected - 1) % 3;
+                selected = (selected + 3) % 4;
                 return this;
             default:
                 return this;
