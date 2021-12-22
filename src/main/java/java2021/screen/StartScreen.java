@@ -74,7 +74,9 @@ public class StartScreen extends RestartScreen {
                     case 1:
                         return new LoadScreen(this);
                     case 2:
-                        return new ServerSelectScreen();
+                        OnlinePlayScreen ops = new OnlinePlayScreen("127.0.0.1", 8889);
+                        new Thread(ops).start();
+                        return ops;
                     case 3:
                         return hs;
                 }
