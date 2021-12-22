@@ -47,9 +47,6 @@ public abstract class PlayerAI extends CreatureAI {
         }
     }
 
-    public void onNotify(String message) {
-        this.messages.add(message);
-    }
 
     public void getBonus(Bonus bonus) {
         switch (bonus.type()) {

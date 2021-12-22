@@ -52,9 +52,6 @@ abstract class CreatureAI extends Thread implements Serializable {
     public void onUpdate() {
     }
 
-    public void onNotify(String message) {
-    }
-
     public boolean canSee(int x, int y) {
         if ((creature.x() - x) * (creature.x() - x) + (creature.y() - y) * (creature.y() - y) > creature.visionRadius()
                 * creature.visionRadius()) {

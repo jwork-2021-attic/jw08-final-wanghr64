@@ -149,7 +149,6 @@ public class Creature implements Serializable {
 
         if (PlayerAI.class.isAssignableFrom(this.ai.getClass()) && bonus != null) {
             ((PlayerAI) this.ai).getBonus(bonus);
-            this.notify("I get a bonus " + bonus.type() + ", LUCKY!");
             bonus.remove();
         }
         if (other == null) {
@@ -167,11 +166,6 @@ public class Creature implements Serializable {
         boolean killed = other.modifyHP(-damage);
 
         System.out.print("attacked");
-        this.notify("You attack the '%s' for %d damage.", other.glyph, damage);
-        other.notify("The '%s' attacks you for %d damage.", glyph, damage);
-
-        if (killed)
-            this.notify("You KILLED '%s' !", other.glyph);
     }
 
     public void update() {
@@ -180,10 +174,6 @@ public class Creature implements Serializable {
 
     public boolean canEnter(int x, int y) {
         return world.tile(x, y).isGround();
-    }
-
-    public void notify(String message, Object... params) {
-        ai.onNotify(String.format(message, params));
     }
 
     public Creature(World world, char glyph, Color color, int maxHP, int attack, int defense, int visionRadius) {
