@@ -30,43 +30,18 @@ public class OnlinePlayScreen implements Screen, Runnable {
         this.screenHeight = 15;
         try {
             this.client = SocketChannel.open(new InetSocketAddress(host, port));
-            buffer = ByteBuffer.allocate(8192);
+            buffer = ByteBuffer.allocate(200000000);
             restLen = 0;
-
-            while (true) {
-                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                buffer.clear();
-                client.read(buffer);
-                buffer.flip();
-                if (restLen == 0) {
-                    restLen = buffer.getInt();
-                }
-                while (restLen > 0 && buffer.remaining() > 0) {
-                    bytes.write(buffer.get());
-                    --restLen;
-                }
-                if (restLen == 0 && bytes.size() > 0) {
-                    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()));
-                    Package2Client pkg = (Package2Client) ois.readObject();
-                    System.out.println("GET package");
-                    this.world = pkg.world();
-                    this.player = pkg.player();
-                    bytes.reset();
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            // TODO: implement server note found exception
         } catch (Exception e) {
-
         }
-
     }
 
     @Override
     public void displayOutput(AsciiPanel terminal) {
-        if (player == null || world == null)
+        if (player == null || world == null) {
+            terminal.write("Wating Other Players...", 6, 15);
             return;
+        }
         // Terrain and creatures
         displayTiles(terminal, getScrollX(), getScrollY());
         // Player
@@ -120,6 +95,20 @@ public class OnlinePlayScreen implements Screen, Runnable {
 
     @Override
     public Screen respondToUserInput(KeyEvent key) {
+        switch (key.getKeyCode()) {
+            case KeyEvent.VK_UP:
+                player.moveBy(0, -1);
+                break;
+            case KeyEvent.VK_DOWN:
+                player.moveBy(0, 1);
+                break;
+            case KeyEvent.VK_LEFT:
+                player.moveBy(-1, 0);
+                break;
+            case KeyEvent.VK_RIGHT:
+                player.moveBy(1, 0);
+                break;
+        }
         try {
             client.write(ByteBuffer.wrap(MyUtils.int2byteArraryBigEnd(key.getKeyCode())));
         } catch (Exception e) {
@@ -146,7 +135,7 @@ public class OnlinePlayScreen implements Screen, Runnable {
                 if (restLen == 0 && bytes.size() > 0) {
                     ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()));
                     Package2Client pkg = (Package2Client) ois.readObject();
-                    System.out.println("GET package");
+                    // System.out.println("GET package");
                     this.world = pkg.world();
                     this.player = pkg.player();
                     if (world == null | player == null) {
