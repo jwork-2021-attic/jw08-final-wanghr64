@@ -2,10 +2,10 @@ package java2021.server;
 
 import java.nio.*;
 import java.nio.channels.*;
+import java.awt.event.KeyEvent;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.util.*;
-import java.util.function.Predicate;
 
 import java2021.world.*;
 import java2021.MyUtils;
@@ -16,18 +16,12 @@ class MyServer extends Thread {
     private World world;
     private Player[] players;
     private PlayerAI[][] pAIs;
-    private int[] curAIs;
-    private int[] preDirects;
-    private int[] HPs;
     private List<String> messages;
     private Random rd;
 
     MyServer() {
         players = new Player[4];
         pAIs = new PlayerAI[4][7];
-        curAIs = new int[4];
-        preDirects = new int[4];
-        HPs = new int[4];
         rd = new Random();
         createWorld();
         createPlayers();
@@ -50,8 +44,6 @@ class MyServer extends Thread {
             pAIs[i][4] = new WaterBrotherAI(players[i], world, messages);
             pAIs[i][5] = new SteelBrotherAI(players[i], world, messages);
             pAIs[i][6] = new HideBrotherAI(players[i], world, messages);
-            curAIs[i] = 0;
-            players[i].setAI(pAIs[i][curAIs[i]]);
         }
     }
 
@@ -82,6 +74,58 @@ class MyServer extends Thread {
         return new Package2Client(world, players[index]);
     }
 
+    public void handleKeyCode(int index, int KeyCode) {
+        Player player = players[index];
+        if (player.freeze())
+            return;
+        switch (KeyCode) {
+            case KeyEvent.VK_A:
+                player.moveBy(-1, 0);
+                player.preDirect = KeyEvent.VK_LEFT;
+                break;
+            case KeyEvent.VK_D:
+                player.moveBy(1, 0);
+                player.preDirect = KeyEvent.VK_RIGHT;
+                break;
+            case KeyEvent.VK_W:
+                player.moveBy(0, -1);
+                player.preDirect = KeyEvent.VK_UP;
+                break;
+            case KeyEvent.VK_S:
+                player.moveBy(0, 1);
+                player.preDirect = KeyEvent.VK_DOWN;
+                break;
+            case KeyEvent.VK_Q:
+                if (!player.onSkill()) {
+                    player.iCurAI = player.iCurAI == 0 ? 6 : player.iCurAI - 1;
+                    while (!player.validAIs[player.iCurAI])
+                        player.iCurAI = player.iCurAI == 0 ? 6 : player.iCurAI - 1;
+                    if (player.iCurAI != 0)
+                        player.setGlyph((char) (144 + player.iCurAI - 1));
+                    else
+                        player.setGlyph((char) 138);
+                }
+                // player.setColor(AsciiPanel.fromPic);
+                break;
+            case KeyEvent.VK_E:
+                if (!player.onSkill()) {
+                    player.iCurAI = (player.iCurAI + 1) % 7;
+                    while (!player.validAIs[player.iCurAI])
+                        player.iCurAI = (player.iCurAI + 1) % 7;
+                    if (player.iCurAI != 0)
+                        player.setGlyph((char) (144 + player.iCurAI - 1));
+                    else
+                        player.setGlyph((char) 138);
+                }
+                break;
+            case KeyEvent.VK_J:
+                if (player.curCoolTime[player.iCurAI] >= player.costCoolTime[player.iCurAI]) {
+                    player.skill();
+                    player.curCoolTime[player.iCurAI] -= player.costCoolTime[player.iCurAI];
+                }
+                break;
+        }
+    }
 }
 
 public class ServerMain {
@@ -92,7 +136,7 @@ public class ServerMain {
         sockerServer.bind(new InetSocketAddress("0.0.0.0", port));
         sockerServer.configureBlocking(false);
         sockerServer.register(selector, SelectionKey.OP_ACCEPT);
-        ByteBuffer buffer = ByteBuffer.allocate(8192);
+        ByteBuffer buffer = ByteBuffer.allocate(500000);
 
         int countPlayers = 0;
 
@@ -115,14 +159,15 @@ public class ServerMain {
                 iter.remove();
             }
             // TODO: just for test
-            if (countPlayers != 0) {
+            if (countPlayers == 4) {
                 server = new MyServer();
+                System.out.println("server is ready!");
                 break;
             }
         }
 
         while (true) {
-            Thread.sleep(100);
+            Thread.sleep(200);
             selector.selectNow();
             Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
             while (iter.hasNext()) {
@@ -135,7 +180,7 @@ public class ServerMain {
                     buffer.flip();
                     while (buffer.remaining() >= 4) {
                         int KeyCode = buffer.getInt();
-                        // TODO: parse KeyCode
+                        server.handleKeyCode(index, KeyCode);
                     }
 
                 }
@@ -150,7 +195,6 @@ public class ServerMain {
                     MyUtils.addInt2ByteArrayOS(tempBaos, baos.size());
                     tempBaos.writeBytes(baos.toByteArray());
                     client.write(ByteBuffer.wrap(tempBaos.toByteArray()));
-                    System.out.println("WRITE, to " + client.socket());
                     baos.close();
                     tempBaos.close();
                 }
