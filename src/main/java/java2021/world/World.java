@@ -1,11 +1,15 @@
 package java2021.world;
 
 import java.awt.Color;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.*;
+
+import java2021.MyUtils;
 
 /*
  * Copyright (C) 2015 Aeranythe Echosong
@@ -172,5 +176,98 @@ public class World implements Serializable {
         for (Creature creature : toUpdate) {
             creature.update();
         }
+    }
+
+    public byte[] wall2Bytes() {
+        int count = 0;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        for (int i = 0; i < this.width; ++i)
+            for (int j = 0; j < this.height; ++j)
+                if (this.tiles[i][j] == Tile.WALL) {
+                    ++count;
+                    baos.write(i);
+                    baos.write(j);
+                }
+        ByteArrayOutputStream temp = new ByteArrayOutputStream();
+        MyUtils.addInt2ByteArrayOS(temp, count);
+        byte[] res = null;
+        try {
+            temp.write(baos.toByteArray());
+            res = temp.toByteArray();
+            baos.close();
+            temp.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return res;
+    }
+
+    public byte[] creature2Bytes() {
+        int count = 0;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        for (Creature c : this.creatures) {
+            ++count;
+            baos.write(c.glyph());
+            baos.write(c.x());
+            baos.write(c.y());
+        }
+        ByteArrayOutputStream temp = new ByteArrayOutputStream();
+        MyUtils.addInt2ByteArrayOS(temp, count);
+        byte[] res = null;
+        try {
+            temp.write(baos.toByteArray());
+            res = temp.toByteArray();
+            baos.close();
+            temp.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return res;
+    }
+
+    public byte[] bonus2Bytes() {
+        int count = 0;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        for (Bonus c : this.bonuses) {
+            ++count;
+            baos.write(c.glyph());
+            baos.write(c.x());
+            baos.write(c.y());
+        }
+        ByteArrayOutputStream temp = new ByteArrayOutputStream();
+        MyUtils.addInt2ByteArrayOS(temp, count);
+        byte[] res = null;
+        try {
+            temp.write(baos.toByteArray());
+            res = temp.toByteArray();
+            baos.close();
+            temp.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return res;
+    }
+
+    public byte[] bullet2Bytes() {
+        int count = 0;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        for (Bullet c : this.bullets) {
+            ++count;
+            baos.write(c.glyph());
+            baos.write(c.x());
+            baos.write(c.y());
+        }
+        ByteArrayOutputStream temp = new ByteArrayOutputStream();
+        MyUtils.addInt2ByteArrayOS(temp, count);
+        byte[] res = null;
+        try {
+            temp.write(baos.toByteArray());
+            res = temp.toByteArray();
+            baos.close();
+            temp.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return res;
     }
 }

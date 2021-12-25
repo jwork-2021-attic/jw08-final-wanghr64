@@ -68,10 +68,28 @@ class MyServer extends Thread {
         }
     }
 
-    public Package2Client getPackage(int index) {
-        if (world == null || players[index] == null)
-            System.out.println("skljdgufdfdg");
-        return new Package2Client(world, players[index]);
+    public byte[] getPackage(int index) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] res = null;
+        try {
+            baos.write(11);
+            baos.write(this.info2Bytes(index));
+            baos.write(22);
+            baos.write(world.wall2Bytes());
+            baos.write(33);
+            baos.write(world.creature2Bytes());
+            baos.write(44);
+            baos.write(world.bonus2Bytes());
+            baos.write(55);
+            baos.write(world.bullet2Bytes());
+            baos.write(66);
+            baos.write(this.skill2Bytes());
+            res = baos.toByteArray();
+            baos.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return res;
     }
 
     public void handleKeyCode(int index, int KeyCode) {
@@ -126,6 +144,50 @@ class MyServer extends Thread {
                 break;
         }
     }
+
+    private byte[] info2Bytes(int index) {
+        // 19 bytes
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(players[index].x());
+        baos.write(players[index].y());
+        baos.write(players[index].hp());
+        baos.write(players[index].digCount);
+        baos.write(players[index].iCurAI);
+        for (int i = 0; i < 7; ++i) {
+            baos.write(players[index].validAIs[i] ? 1 : 0);
+        }
+        for (int i = 0; i < 7; ++i)
+            baos.write(players[index].curCoolTime[i]);
+        byte[] res = baos.toByteArray();
+        try {
+            baos.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return res;
+    }
+
+    private byte[] skill2Bytes() {
+        // 20 bytes
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        for (int i = 0; i < 4; ++i) {
+            baos.write(players[i].x());
+            baos.write(players[i].y());
+        }
+        for (int i = 0; i < 4; ++i)
+            baos.write(players[i].iCurAI);
+        for (int i = 0; i < 4; ++i)
+            baos.write(players[i].preDirect);
+        for (int i = 0; i < 4; ++i)
+            baos.write(players[i].onSkill() ? 1 : 0);
+        byte[] res = baos.toByteArray();
+        try {
+            baos.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return res;
+    }
 }
 
 public class ServerMain {
@@ -159,7 +221,7 @@ public class ServerMain {
                 iter.remove();
             }
             // TODO: just for test
-            if (countPlayers == 4) {
+            if (countPlayers == 1) {
                 server = new MyServer();
                 System.out.println("server is ready!");
                 break;
@@ -167,7 +229,7 @@ public class ServerMain {
         }
 
         while (true) {
-            Thread.sleep(200);
+            Thread.sleep(50);
             selector.selectNow();
             Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
             while (iter.hasNext()) {
@@ -187,16 +249,12 @@ public class ServerMain {
                 if (key.isWritable()) {
                     SocketChannel client = (SocketChannel) key.channel();
                     int index = (Integer) key.attachment();
+
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ObjectOutputStream oos = new ObjectOutputStream(baos);
-                    oos.writeObject(server.getPackage(index));
-                    oos.close();
-                    ByteArrayOutputStream tempBaos = new ByteArrayOutputStream();
-                    MyUtils.addInt2ByteArrayOS(tempBaos, baos.size());
-                    tempBaos.writeBytes(baos.toByteArray());
-                    client.write(ByteBuffer.wrap(tempBaos.toByteArray()));
+                    baos.write(server.getPackage(index));
+
+                    client.write(ByteBuffer.wrap(baos.toByteArray()));
                     baos.close();
-                    tempBaos.close();
                 }
             }
         }
