@@ -31,6 +31,7 @@ public class PowerBrotherAI extends PlayerAI {
             Thread.sleep(500);
         } catch (Exception e) {
             // TODO: handle exception
+            System.out.println(e);
         }
         freeze = false;
         onSkill = false;

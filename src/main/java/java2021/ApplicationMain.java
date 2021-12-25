@@ -86,6 +86,7 @@ public class ApplicationMain extends JFrame implements KeyListener {
                 try {
                     Thread.sleep(33);
                 } catch (Exception e) {
+                    System.out.println(e);
                 }
             }
         }).start();

@@ -16,6 +16,7 @@ public class HideBrotherAI extends PlayerAI {
         try {
             Thread.sleep(5000);
         } catch (Exception e) {
+            System.out.println(e);
         }
         player.isVisible = true;
         player.setGlyph((char) 149);

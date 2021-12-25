@@ -37,6 +37,7 @@ public class WaterBrotherAI extends PlayerAI {
         try {
             Thread.sleep(1000);
         } catch (Exception e) {
+            System.out.println(e);
         }
         freeze = false;
         onSkill = false;

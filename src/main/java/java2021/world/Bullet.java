@@ -111,7 +111,8 @@ public class Bullet extends Thread implements Serializable {
             try {
                 Thread.sleep(200);
             } catch (Exception e) {
-            }
+            System.out.println(e);
+        }
         }
     }
 }

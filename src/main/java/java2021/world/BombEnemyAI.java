@@ -44,7 +44,8 @@ public class BombEnemyAI extends EnemyAI {
             try {
                 Thread.sleep(rd.nextInt(200) + 100);
             } catch (Exception e) {
-            }
+            System.out.println(e);
+        }
         }
     }
 }

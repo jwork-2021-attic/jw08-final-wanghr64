@@ -47,6 +47,7 @@ public class StartScreen extends RestartScreen {
                 lines.add(lineText);
             br.close();
         } catch (Exception e) {
+            System.out.println(e);
         }
     }
 
@@ -57,7 +58,7 @@ public class StartScreen extends RestartScreen {
                 terminal.write(lines.get(i), 2, upBound + i, AsciiPanel.white, AsciiPanel.black);
             terminal.write((char) 33, 11, 12 + selected, Color.MAGENTA);
         } catch (Exception e) {
-            terminal.write("File not found.", 2, 10);
+            System.out.println(e);
         }
 
     }
@@ -74,9 +75,7 @@ public class StartScreen extends RestartScreen {
                     case 1:
                         return new LoadScreen(this);
                     case 2:
-                        OnlinePlayScreen ops = new OnlinePlayScreen("127.0.0.1", 8889);
-                        new Thread(ops).start();
-                        return ops;
+                         return new ServerSelectScreen();
                     case 3:
                         return hs;
                 }

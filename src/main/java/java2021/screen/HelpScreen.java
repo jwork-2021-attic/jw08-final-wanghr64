@@ -29,6 +29,7 @@ public class HelpScreen implements Screen {
                 lines.add(line);
             br.close();
         } catch (Exception e) {
+            System.out.println(e);
         }
     }
 
@@ -46,22 +47,22 @@ public class HelpScreen implements Screen {
     @Override
     public Screen respondToUserInput(KeyEvent key) {
         switch (key.getKeyCode()) {
-        case KeyEvent.VK_UP:
-            isEnd = false;
-            if (scroll > 0)
-                --scroll;
-            return this;
-        case KeyEvent.VK_DOWN:
-            if (scroll < lines.size() - (downBound - upBound))
-                ++scroll;
-            else
-                isEnd = true;
-            return this;
-        case KeyEvent.VK_ESCAPE:
-            scroll = 0;
-            return this.ss;
-        default:
-            return this;
+            case KeyEvent.VK_UP:
+                isEnd = false;
+                if (scroll > 0)
+                    --scroll;
+                return this;
+            case KeyEvent.VK_DOWN:
+                if (scroll < lines.size() - (downBound - upBound))
+                    ++scroll;
+                else
+                    isEnd = true;
+                return this;
+            case KeyEvent.VK_ESCAPE:
+                scroll = 0;
+                return this.ss;
+            default:
+                return this;
         }
     }
 }

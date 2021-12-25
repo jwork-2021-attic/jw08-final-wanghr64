@@ -58,7 +58,8 @@ public class BulletEnemyAI extends EnemyAI {
             try {
                 Thread.sleep(rd.nextInt(300) + 300);
             } catch (Exception e) {
-            }
+            System.out.println(e);
+        }
         }
     }
 }

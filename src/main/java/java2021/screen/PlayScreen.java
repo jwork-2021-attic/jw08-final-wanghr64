@@ -50,6 +50,7 @@ public class PlayScreen implements Screen, Serializable, Runnable {
                 try {
                     Thread.sleep(1000);
                 } catch (Exception e) {
+                    System.out.println(e);
                 }
             }
         }, 0, 1000);
@@ -78,6 +79,7 @@ public class PlayScreen implements Screen, Serializable, Runnable {
                 try {
                     Thread.sleep(3000);
                 } catch (Exception e) {
+                    System.out.println(e);
                 }
             }
         }, 5000, 5000);
@@ -248,24 +250,28 @@ public class PlayScreen implements Screen, Serializable, Runnable {
                                     && world.tile(wxx + j, wyy + i) != Tile.WALL)
                                 terminal.write((char) 164, xx + j, yy + i, AsciiPanel.fromPic);
                         } catch (Exception e) {
+                            System.out.println(e);
                         }
                         try {
                             if (xx + j < screenWidth && xx + j >= 0 && yy - i < screenHeight && yy - i >= 0
                                     && world.tile(wxx + j, wyy - i) != Tile.WALL)
                                 terminal.write((char) 164, xx + j, yy - i, AsciiPanel.fromPic);
                         } catch (Exception e) {
+                            System.out.println(e);
                         }
                         try {
                             if (xx - j < screenWidth && xx - j >= 0 && yy + i < screenHeight && yy + i >= 0
                                     && world.tile(wxx - j, wyy + i) != Tile.WALL)
                                 terminal.write((char) 164, xx - j, yy + i, AsciiPanel.fromPic);
                         } catch (Exception e) {
+                            System.out.println(e);
                         }
                         try {
                             if (xx - j < screenWidth && xx - j >= 0 && yy - i < screenHeight && yy - i >= 0
                                     && world.tile(wxx - j, wyy - i) != Tile.WALL)
                                 terminal.write((char) 164, xx - j, yy - i, AsciiPanel.fromPic);
                         } catch (Exception e) {
+                            System.out.println(e);
                         }
 
                     }

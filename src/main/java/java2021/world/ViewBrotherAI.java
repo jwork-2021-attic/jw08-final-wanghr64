@@ -15,6 +15,7 @@ public class ViewBrotherAI extends PlayerAI {
         try {
             Thread.sleep(2000);
         } catch (Exception e) {
+            System.out.println(e);
         }
         allSee = false;
         onSkill = false;

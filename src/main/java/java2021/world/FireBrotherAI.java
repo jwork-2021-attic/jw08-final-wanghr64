@@ -38,6 +38,7 @@ public class FireBrotherAI extends PlayerAI {
         try {
             Thread.sleep(800);
         } catch (Exception e) {
+            System.out.println(e);
         }
         freeze = false;
         onSkill = false;

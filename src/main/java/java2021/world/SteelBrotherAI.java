@@ -17,6 +17,7 @@ public class SteelBrotherAI extends PlayerAI {
         try {
             Thread.sleep(5000);
         } catch (Exception e) {
+            System.out.println(e);
         }
         player.setDefense(defence);
         player.setGlyph((char) 148);
