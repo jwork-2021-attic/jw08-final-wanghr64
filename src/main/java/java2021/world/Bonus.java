@@ -45,7 +45,7 @@ public class Bonus implements Serializable {
                 return (char) 141;
             case 2:
                 return (char) 142;
-            case 999:
+            case 100:
                 return (char) 165;
             default:
                 return (char) 132;
