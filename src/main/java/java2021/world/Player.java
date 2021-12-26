@@ -14,7 +14,7 @@ public class Player extends Creature {
         super(world, glyph, color, maxHP, attack, defense, visionRadius);
         this.validAIs = new boolean[7];
         this.index = index;
-        Arrays.fill(this.validAIs, true);
+        Arrays.fill(this.validAIs, false);
         this.validAIs[0] = true;
         maxCoolTime = new int[] { 0, 10, 10, 10, 10, 10, 10 };
         costCoolTime = new int[] { 0, 1, 10, 3, 7, 10, 10 };
