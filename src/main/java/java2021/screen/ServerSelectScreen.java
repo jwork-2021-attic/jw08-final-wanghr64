@@ -1,7 +1,6 @@
 package java2021.screen;
 
 import java.awt.event.KeyEvent;
-import java.util.*;
 
 import java2021.asciiPanel.AsciiPanel;
 
@@ -48,7 +47,16 @@ public class ServerSelectScreen implements Screen {
                 host.deleteCharAt(host.length() - 1);
             else
                 port.deleteCharAt(port.length() - 1);
-        } else {
+        } else if (key.getKeyCode() == KeyEvent.VK_ENTER) {
+            try {
+                OnlinePlayScreen ops = new OnlinePlayScreen(host.toString(), Integer.parseInt(port.toString()));
+                new Thread(ops).start();
+                return ops;
+            } catch (Exception e) {
+                return new ConnectionFailureScreen();
+            }
+
+        } else if (key.getKeyCode() == KeyEvent.VK_PERIOD || isCharacter(key.getKeyCode())) {
             char keyChar = key.getKeyChar();
             if (!inputMode)
                 host.append(keyChar);
@@ -58,6 +66,11 @@ public class ServerSelectScreen implements Screen {
             }
         }
         return this;
+    }
+
+    private static boolean isCharacter(int keyCode) {
+        return (keyCode >= 65 && keyCode <= 90) || (keyCode >= 47 && keyCode <= 57) || (keyCode >= 96 && keyCode <= 105)
+                || keyCode == 190 || keyCode == 110;
     }
 
 }
