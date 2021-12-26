@@ -7,7 +7,6 @@ import java.util.*;
 import java.nio.*;
 import java.io.*;
 import java.util.concurrent.*;
-import java.util.function.Predicate;
 import java.awt.Color;
 
 import java2021.MyUtils;
@@ -18,11 +17,12 @@ public class OnlinePlayScreen implements Screen, Runnable {
 
     private SocketChannel client;
 
+    private int myIndex;
+
     private int[] curCoolTime;
     private boolean[] validAIs;
     private boolean[] onSkill;
     private int[] preDirect;
-    private boolean myOnSkill;
     private int xx;
     private int yy;
     private int HP;
@@ -37,10 +37,15 @@ public class OnlinePlayScreen implements Screen, Runnable {
     private ConcurrentLinkedDeque<int[]> bonus;
     private ConcurrentLinkedDeque<int[]> bullet;
 
+    private boolean won = false;
+    private boolean lost = false;
+    private boolean disconnected = false;
+    private int wonIndex;
+
     private int screenWidth;
     private int screenHeight;
 
-    public OnlinePlayScreen(String host, int port) {
+    public OnlinePlayScreen(String host, int port) throws Exception {
         curCoolTime = new int[7];
         validAIs = new boolean[7];
         onSkill = new boolean[4];
@@ -49,11 +54,7 @@ public class OnlinePlayScreen implements Screen, Runnable {
         playerPoints = new int[4][2];
         this.screenWidth = 38;
         this.screenHeight = 15;
-        try {
-            this.client = SocketChannel.open(new InetSocketAddress(host, port));
-        } catch (Exception e) {
-            System.out.print(e);
-        }
+        this.client = SocketChannel.open(new InetSocketAddress(host, port));
     }
 
     @Override
@@ -69,6 +70,8 @@ public class OnlinePlayScreen implements Screen, Runnable {
         String stats = String.format("%3d/%3d hp %2d digs", HP,
                 100, digCount);
         terminal.write(stats, 1, 16);
+        terminal.write(Integer.toString(myCurAI), 26, 16);
+        terminal.write(onSkill[myIndex] ? "True" : "False", 28, 16);
         // Cool Times
         displayCoolTime(terminal);
         // Skills
@@ -79,6 +82,17 @@ public class OnlinePlayScreen implements Screen, Runnable {
 
     @Override
     public Screen respondToUserInput(KeyEvent key) {
+        if (lost)
+            return new LoseScreen();
+        if (won) {
+            if (wonIndex == myIndex)
+                return new WinScreen();
+            else
+                return new OtherWinScreen(wonIndex);
+        }
+        if (disconnected) {
+            return new LostConnectionScreen();
+        }
         try {
             client.write(ByteBuffer.wrap(MyUtils.int2byteArraryBigEnd(key.getKeyCode())));
         } catch (Exception e) {
@@ -94,7 +108,7 @@ public class OnlinePlayScreen implements Screen, Runnable {
             ByteBuffer buffer = ByteBuffer.allocate(200000000);
             int restLen = 0;
             int type = 0;
-            while (true) {
+            while (!(lost || won || disconnected)) {
                 buffer.clear();
                 client.read(buffer);
                 buffer.flip();
@@ -103,6 +117,13 @@ public class OnlinePlayScreen implements Screen, Runnable {
                         type = buffer.get();
                         // System.out.println(type);
                         switch (type) {
+                            case 0:
+                            case 1:
+                            case 2:
+                            case 3:
+                                myIndex = type;
+                                restLen = 0;
+                                break;
                             case 11:
                                 restLen = 19;
                                 break;
@@ -121,8 +142,20 @@ public class OnlinePlayScreen implements Screen, Runnable {
                             case 66:
                                 restLen = 20;
                                 break;
+                            case 77:
+                                wonIndex = buffer.get();
+                                won = true;
+                                break;
+                            case 88:
+                                lost = true;
+                                break;
+                            case 99:
+                                disconnected = true;
+                                break;
                         }
                     }
+                    if (won || lost || disconnected)
+                        break;
                     while (restLen > 0 && buffer.remaining() > 0) {
                         bytes.write(buffer.get());
                         --restLen;
@@ -212,8 +245,11 @@ public class OnlinePlayScreen implements Screen, Runnable {
     }
 
     private boolean canSee(int x, int y) {
-        return (xx - x) * (xx - x) + (yy - y) * (yy - y) <= 9
-                * 9;
+        if (onSkill[myIndex] && myCurAI == 2)
+            return true;
+        else
+            return (xx - x) * (xx - x) + (yy - y) * (yy - y) <= 9
+                    * 9;
     }
 
     private void displayAI(AsciiPanel terminal) {
@@ -271,16 +307,6 @@ public class OnlinePlayScreen implements Screen, Runnable {
                 terminal.write(Tile.WALL.glyph(), x - left, y - top, AsciiPanel.fromPic);
         }
 
-        // Show creatures
-        for (int[] p : creature) {
-            char glyph = (char) ((int) p[0]);
-            int x = p[1];
-            int y = p[2];
-            if (x >= left && x < left + screenWidth && y >= top
-                    && y < top + screenHeight && canSee(x, y))
-                terminal.write(glyph, x - left, y - top, AsciiPanel.fromPic);
-        }
-
         // Show bonuses
         for (int[] p : bonus) {
             char glyph = (char) p[0];
@@ -294,6 +320,16 @@ public class OnlinePlayScreen implements Screen, Runnable {
         // Show bullets
         for (int[] p : bonus) {
             char glyph = (char) p[0];
+            int x = p[1];
+            int y = p[2];
+            if (x >= left && x < left + screenWidth && y >= top
+                    && y < top + screenHeight && canSee(x, y))
+                terminal.write(glyph, x - left, y - top, AsciiPanel.fromPic);
+        }
+
+        // Show creatures
+        for (int[] p : creature) {
+            char glyph = (char) ((int) p[0]);
             int x = p[1];
             int y = p[2];
             if (x >= left && x < left + screenWidth && y >= top
