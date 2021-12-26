@@ -6,9 +6,14 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Player extends Creature {
-    public Player(World world, char glyph, Color color, int maxHP, int attack, int defense, int visionRadius) {
+
+    public int index;
+
+    public Player(int index, World world, char glyph, Color color, int maxHP, int attack, int defense,
+            int visionRadius) {
         super(world, glyph, color, maxHP, attack, defense, visionRadius);
         this.validAIs = new boolean[7];
+        this.index = index;
         Arrays.fill(this.validAIs, true);
         this.validAIs[0] = true;
         maxCoolTime = new int[] { 0, 10, 10, 10, 10, 10, 10 };
@@ -18,13 +23,13 @@ public class Player extends Creature {
         messages = new ArrayList<>();
 
         myAIs = new PlayerAI[7];
-        myAIs[0] = new OldManAI(this, world, messages);
-        myAIs[1] = new PowerBrotherAI(this, world, messages);
-        myAIs[2] = new ViewBrotherAI(this, world, messages);
-        myAIs[3] = new FireBrotherAI(this, world, messages);
-        myAIs[4] = new WaterBrotherAI(this, world, messages);
-        myAIs[5] = new SteelBrotherAI(this, world, messages);
-        myAIs[6] = new HideBrotherAI(this, world, messages);
+        myAIs[0] = new OldManAI(this, world);
+        myAIs[1] = new PowerBrotherAI(this, world);
+        myAIs[2] = new ViewBrotherAI(this, world);
+        myAIs[3] = new FireBrotherAI(this, world);
+        myAIs[4] = new WaterBrotherAI(this, world);
+        myAIs[5] = new SteelBrotherAI(this, world);
+        myAIs[6] = new HideBrotherAI(this, world);
     }
 
     public int digCount = 0;
