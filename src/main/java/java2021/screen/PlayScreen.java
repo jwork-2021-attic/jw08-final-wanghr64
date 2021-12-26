@@ -48,7 +48,6 @@ public class PlayScreen implements Screen, Serializable, Runnable {
                     if (player.curCoolTime[i] < player.maxCoolTime[i])
                         ++player.curCoolTime[i];
                 try {
-                    Thread.sleep(1000);
                 } catch (Exception e) {
                     System.out.println(e);
                 }
@@ -77,7 +76,6 @@ public class PlayScreen implements Screen, Serializable, Runnable {
                     world.addBonusAtEmptyLocation(new Bonus(world, 999));
                 }
                 try {
-                    Thread.sleep(3000);
                 } catch (Exception e) {
                     System.out.println(e);
                 }
@@ -100,12 +98,12 @@ public class PlayScreen implements Screen, Serializable, Runnable {
 
         for (int i = 0; i < 10; ++i) {
             Creature enemy = new Creature(this.world, (char) 15, AsciiPanel.fromPic, 1, 20, 1, 9);
-            new Thread(new BulletEnemyAI(enemy, world, player));
+            new Thread(new BulletEnemyAI(enemy, world, player)).start();
             world.addAtEmptyLocation(enemy);
         }
         for (int i = 0; i < 10; ++i) {
             Creature enemy = new Creature(this.world, (char) 15, AsciiPanel.fromPic, 1, 20, 1, 9);
-            new Thread(new BombEnemyAI(enemy, world, player));
+            new Thread(new BombEnemyAI(enemy, world, player)).start();
             world.addAtEmptyLocation(enemy);
         }
     }
