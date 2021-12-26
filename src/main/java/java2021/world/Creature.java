@@ -148,8 +148,8 @@ public class Creature implements Serializable {
         Bonus bonus = world.bonus(x + mx, y + my);
 
         if (PlayerAI.class.isAssignableFrom(this.ai.getClass()) && bonus != null) {
-            ((PlayerAI) this.ai).getBonus(bonus);
-            bonus.remove();
+            if (((PlayerAI) this.ai).getBonus(bonus))
+                bonus.remove();
         }
         if (other == null) {
             ai.onEnter(x + mx, y + my, world.tile(x + mx, y + my));
