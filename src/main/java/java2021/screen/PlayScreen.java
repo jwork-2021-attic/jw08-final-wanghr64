@@ -95,7 +95,7 @@ public class PlayScreen implements Screen, Serializable, Runnable {
     }
 
     private void createCreatures() {
-        player = new Player(this.world, (char) 138, AsciiPanel.fromPic, 100, 20, 10, 9);
+        player = new Player(0, this.world, (char) 138, AsciiPanel.fromPic, 100, 20, 10, 9);
         world.addAtEmptyLocation(player);
 
         for (int i = 0; i < 10; ++i) {
