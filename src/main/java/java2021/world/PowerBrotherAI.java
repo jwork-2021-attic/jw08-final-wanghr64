@@ -5,8 +5,8 @@ import java.awt.event.KeyEvent;
 
 public class PowerBrotherAI extends PlayerAI {
 
-    public PowerBrotherAI(Creature creature, World world, List<String> messages) {
-        super(creature, world, messages);
+    public PowerBrotherAI(Creature creature, World world) {
+        super(creature, world);
     }
 
     @Override

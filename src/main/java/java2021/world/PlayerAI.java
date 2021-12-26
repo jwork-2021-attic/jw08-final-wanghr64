@@ -26,15 +26,12 @@ import java.util.*;
  */
 public abstract class PlayerAI extends CreatureAI {
 
-    private List<String> messages;
-
     protected Player player = (Player) creature;
 
     protected boolean allSee;
 
-    public PlayerAI(Creature creature, World world, List<String> messages) {
+    public PlayerAI(Creature creature, World world) {
         super(creature, world);
-        this.messages = messages;
     }
 
     public void onEnter(int x, int y, Tile tile) {
@@ -47,44 +44,33 @@ public abstract class PlayerAI extends CreatureAI {
         }
     }
 
+    public boolean getBonus(Bonus bonus) {
 
-    public void getBonus(Bonus bonus) {
         switch (bonus.type()) {
             case 0:// dig
                 player.digCount += 10;
-                break;
+                return true;
             case 1:// hp
                 int diffHP = Math.min(10, 100 - player.hp());
                 player.modifyHP(diffHP);
-                break;
+                return true;
             case 2:// ct
                 for (int i = 1; i < 7; ++i)
                     player.curCoolTime[i] = 10;
-                break;
-            case 11:// 1
-                player.validAIs[1] = true;
-                break;
-            case 12:// 2
-                player.validAIs[2] = true;
-                break;
-            case 13:// 3
-                player.validAIs[3] = true;
-                break;
-            case 14:// 4
-                player.validAIs[4] = true;
-                break;
-            case 15:// 5
-                player.validAIs[5] = true;
-                break;
-            case 16:// 6
-                player.validAIs[6] = true;
-                break;
-            case 999:
-                player.win = true;
-                break;
+                return true;
             default:
                 break;
         }
+        int unlockType = bonus.type() - (player.index + 1) * 10;
+        if (unlockType >= 1 && unlockType <= 6) {
+            player.validAIs[unlockType] = true;
+            return true;
+        }
+        if (bonus.type() - (player.index) == 100) {
+            player.win = true;
+            return true;
+        }
+        return false;
     }
 
     @Override

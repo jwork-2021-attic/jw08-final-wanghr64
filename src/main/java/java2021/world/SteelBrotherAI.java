@@ -4,8 +4,8 @@ import java.util.*;
 
 public class SteelBrotherAI extends PlayerAI {
 
-    public SteelBrotherAI(Creature creature, World world, List<String> messages) {
-        super(creature, world, messages);
+    public SteelBrotherAI(Creature creature, World world) {
+        super(creature, world);
     }
 
     @Override

@@ -4,8 +4,8 @@ import java.util.*;
 
 public class HideBrotherAI extends PlayerAI {
 
-    public HideBrotherAI(Creature creature, World world, List<String> messages) {
-        super(creature, world, messages);
+    public HideBrotherAI(Creature creature, World world) {
+        super(creature, world);
     }
 
     @Override

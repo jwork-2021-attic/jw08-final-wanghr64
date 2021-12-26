@@ -4,8 +4,8 @@ import java.util.*;
 
 public class ViewBrotherAI extends PlayerAI {
 
-    public ViewBrotherAI(Creature creature, World world, List<String> messages) {
-        super(creature, world, messages);
+    public ViewBrotherAI(Creature creature, World world) {
+        super(creature, world);
     }
 
     @Override

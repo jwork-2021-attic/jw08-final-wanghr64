@@ -4,8 +4,8 @@ import java.util.*;
 
 public class WaterBrotherAI extends PlayerAI {
 
-    public WaterBrotherAI(Creature creature, World world, List<String> messages) {
-        super(creature, world, messages);
+    public WaterBrotherAI(Creature creature, World world) {
+        super(creature, world);
     }
 
     @Override
