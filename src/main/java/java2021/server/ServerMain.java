@@ -29,57 +29,57 @@ class MyServer {
         createWorld();
         createPlayers();
         createEnemies();
-        createBonuses();/*
-                         * coolTimeUpdate = new Timer();
-                         * coolTimeUpdate.schedule(new TimerTask() {
-                         * 
-                         * @Override
-                         * public void run() {
-                         * for (int index = 0; index < 4; ++index) {
-                         * Player player = players[index];
-                         * for (int i = 1; i < 7; ++i)
-                         * if (player.curCoolTime[i] < player.maxCoolTime[i])
-                         * ++player.curCoolTime[i];
-                         * }
-                         * try {
-                         * } catch (Exception e) {
-                         * System.out.println(e);
-                         * }
-                         * }
-                         * }, 0, 1000);
-                         * generateEnemyBonus = new Timer();
-                         * generateEnemyBonus.schedule(new TimerTask() {
-                         * 
-                         * @Override
-                         * public void run() {
-                         * Random rd = new Random();
-                         * if (rd.nextInt(2) == 0) {
-                         * Creature enemy = new Creature(world, (char) 15, AsciiPanel.fromPic, 15, 20,
-                         * 5, 9);
-                         * new Thread(new BulletEnemyAI(enemy, world, players[rd.nextInt(4)])).start();
-                         * world.addAtEmptyLocation(enemy);
-                         * } else {
-                         * Creature enemy = new Creature(world, (char) 15, AsciiPanel.fromPic, 1, 20, 5,
-                         * 9);
-                         * new Thread(new BombEnemyAI(enemy, world, players[rd.nextInt(4)])).start();
-                         * world.addAtEmptyLocation(enemy);
-                         * }
-                         * world.addBonusAtEmptyLocation(new Bonus(world, rd.nextInt(3)));
-                         * for (int index = 0; index < 4; ++index)
-                         * for (int i = 0; i < 7; ++i)
-                         * if (players[index].validAIs[i] == false)
-                         * won[index] = false;
-                         * for (int index = 0; index < 4; ++index)
-                         * if (won[index]) {
-                         * world.addBonusAtEmptyLocation(new Bonus(world, 100 + index));
-                         * }
-                         * try {
-                         * } catch (Exception e) {
-                         * System.out.println(e);
-                         * }
-                         * }
-                         * }, 3000, 3000);
-                         */
+        createBonuses();
+        coolTimeUpdate = new Timer();
+        coolTimeUpdate.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+                for (int index = 0; index < 4; ++index) {
+                    Player player = players[index];
+                    for (int i = 1; i < 7; ++i)
+                        if (player.curCoolTime[i] < player.maxCoolTime[i])
+                            ++player.curCoolTime[i];
+                }
+                try {
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        }, 0, 1000);
+        generateEnemyBonus = new Timer();
+        generateEnemyBonus.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+                Random rd = new Random();
+                if (rd.nextInt(2) == 0) {
+                    Creature enemy = new Creature(world, (char) 15, AsciiPanel.fromPic, 15, 20,
+                            5, 9);
+                    new Thread(new BulletEnemyAI(enemy, world, players[rd.nextInt(4)])).start();
+                    world.addAtEmptyLocation(enemy);
+                } else {
+                    Creature enemy = new Creature(world, (char) 15, AsciiPanel.fromPic, 1, 20, 5,
+                            9);
+                    new Thread(new BombEnemyAI(enemy, world, players[rd.nextInt(4)])).start();
+                    world.addAtEmptyLocation(enemy);
+                }
+                world.addBonusAtEmptyLocation(new Bonus(world, rd.nextInt(3)));
+                for (int index = 0; index < 4; ++index)
+                    for (int i = 0; i < 7; ++i)
+                        if (players[index].validAIs[i] == false)
+                            won[index] = false;
+                for (int index = 0; index < 4; ++index)
+                    if (won[index]) {
+                        world.addBonusAtEmptyLocation(new Bonus(world, 100 + index));
+                    }
+                try {
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        }, 3000, 3000);
+
     }
 
     private void createWorld() {
@@ -88,7 +88,7 @@ class MyServer {
 
     private void createPlayers() {
         for (int i = 0; i < 4; ++i) {
-            players[i] = new Player(i, this.world, (char) 138, AsciiPanel.fromPic, 100, 20, 500, 9);
+            players[i] = new Player(i, this.world, (char) 138, AsciiPanel.fromPic, 100, 20, 10, 9);
             world.addAtEmptyLocation(players[i]);
             pAIs[i][0] = new OldManAI(players[i], world);
             pAIs[i][1] = new PowerBrotherAI(players[i], world);
@@ -320,7 +320,6 @@ public class ServerMain {
                         }
                         iter.remove();
                     }
-                    // TODO: just for test
                     if (countPlayers == 4) {
                         server = new MyServer();
                         System.out.println("server is ready!");
