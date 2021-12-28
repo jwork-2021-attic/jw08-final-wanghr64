@@ -3,7 +3,6 @@ package java2021.screen;
 import java.awt.event.KeyEvent;
 import java.net.InetSocketAddress;
 import java.nio.channels.*;
-import java.util.*;
 import java.nio.*;
 import java.io.*;
 import java.util.concurrent.*;
@@ -23,11 +22,11 @@ public class OnlinePlayScreen implements Screen, Runnable {
     private boolean[] validAIs;
     private boolean[] onSkill;
     private int[] preDirect;
-    private int xx;
-    private int yy;
+    public int xx;
+    public int yy;
     private int HP;
     private int[] icurAI;
-    private int myCurAI;
+    public int myCurAI;
     private int digCount;
     private int[][] playerPoints;
     private final int worldWidth = 90;
@@ -54,7 +53,8 @@ public class OnlinePlayScreen implements Screen, Runnable {
         playerPoints = new int[4][2];
         this.screenWidth = 38;
         this.screenHeight = 15;
-        this.client = SocketChannel.open(new InetSocketAddress(host, port));
+        if (!host.equals(""))
+            this.client = SocketChannel.open(new InetSocketAddress(host, port));
     }
 
     @Override
@@ -64,8 +64,7 @@ public class OnlinePlayScreen implements Screen, Runnable {
             return;
         }
         terminal.clear();
-        // Terrain and creatures
-        displayTiles(terminal, getScrollX(), getScrollY());
+
         // Stats
         String stats = String.format("%3d/%3d hp %2d digs", HP,
                 100, digCount);
@@ -74,6 +73,9 @@ public class OnlinePlayScreen implements Screen, Runnable {
         terminal.write(onSkill[myIndex] ? "True" : "False", 28, 16);
         // Cool Times
         displayCoolTime(terminal);
+
+        // Terrain and creatures
+        displayTiles(terminal, getScrollX(), getScrollY());
         // Skills
         displaySkill(terminal);
         // valid & selected AIs
@@ -193,7 +195,7 @@ public class OnlinePlayScreen implements Screen, Runnable {
         }
     }
 
-    private static ConcurrentLinkedDeque<int[]> twoBytes2List(byte[] arr) {
+    public static ConcurrentLinkedDeque<int[]> twoBytes2List(byte[] arr) {
         ConcurrentLinkedDeque<int[]> res = new ConcurrentLinkedDeque<>();
         for (int i = 0; i < arr.length; i += 2) {
             res.add(new int[] { Byte.toUnsignedInt(arr[i]), Byte.toUnsignedInt(arr[i + 1]) });
@@ -201,7 +203,7 @@ public class OnlinePlayScreen implements Screen, Runnable {
         return res;
     }
 
-    private static ConcurrentLinkedDeque<int[]> threeBytes2List(byte[] arr) {
+    public static ConcurrentLinkedDeque<int[]> threeBytes2List(byte[] arr) {
         ConcurrentLinkedDeque<int[]> res = new ConcurrentLinkedDeque<>();
         for (int i = 0; i < arr.length; i += 3) {
             res.add(new int[] { Byte.toUnsignedInt(arr[i]), Byte.toUnsignedInt(arr[i + 1]),
@@ -236,15 +238,15 @@ public class OnlinePlayScreen implements Screen, Runnable {
 
     }
 
-    private int getScrollX() {
+    public int getScrollX() {
         return Math.max(0, Math.min(xx - screenWidth / 2, worldWidth - screenWidth));
     }
 
-    private int getScrollY() {
+    public int getScrollY() {
         return Math.max(0, Math.min(yy - screenHeight / 2, worldHeight - screenHeight));
     }
 
-    private boolean canSee(int x, int y) {
+    public boolean canSee(int x, int y) {
         if (onSkill[myIndex] && myCurAI == 2)
             return true;
         else
@@ -318,7 +320,7 @@ public class OnlinePlayScreen implements Screen, Runnable {
         }
 
         // Show bullets
-        for (int[] p : bonus) {
+        for (int[] p : bullet) {
             char glyph = (char) p[0];
             int x = p[1];
             int y = p[2];
@@ -358,24 +360,28 @@ public class OnlinePlayScreen implements Screen, Runnable {
                     case 1:
                         switch (preDirect[kkk]) {
                             case KeyEvent.VK_LEFT:
-                                terminal.write("*", playerPoints[kkk][0] - getScrollX() - 1,
-                                        playerPoints[kkk][1] - getScrollY(),
-                                        Color.RED);
+                                if (canSee(playerPoints[kkk][0] - 1, playerPoints[kkk][1]))
+                                    terminal.write("*", playerPoints[kkk][0] - getScrollX() - 1,
+                                            playerPoints[kkk][1] - getScrollY(),
+                                            Color.RED);
                                 break;
                             case KeyEvent.VK_RIGHT:
-                                terminal.write("*", playerPoints[kkk][0] - getScrollX() + 1,
-                                        playerPoints[kkk][1] - getScrollY(),
-                                        Color.RED);
+                                if (canSee(playerPoints[kkk][0] + 1, playerPoints[kkk][1]))
+                                    terminal.write("*", playerPoints[kkk][0] - getScrollX() + 1,
+                                            playerPoints[kkk][1] - getScrollY(),
+                                            Color.RED);
                                 break;
                             case KeyEvent.VK_UP:
-                                terminal.write("*", playerPoints[kkk][0] - getScrollX(),
-                                        playerPoints[kkk][1] - getScrollY() - 1,
-                                        Color.RED);
+                                if (canSee(playerPoints[kkk][0], playerPoints[kkk][1] - 1))
+                                    terminal.write("*", playerPoints[kkk][0] - getScrollX(),
+                                            playerPoints[kkk][1] - getScrollY() - 1,
+                                            Color.RED);
                                 break;
                             case KeyEvent.VK_DOWN:
-                                terminal.write("*", playerPoints[kkk][0] - getScrollX(),
-                                        playerPoints[kkk][1] - getScrollY() + 1,
-                                        Color.RED);
+                                if (canSee(playerPoints[kkk][0], playerPoints[kkk][1] + 1))
+                                    terminal.write("*", playerPoints[kkk][0] - getScrollX(),
+                                            playerPoints[kkk][1] - getScrollY() + 1,
+                                            Color.RED);
                                 break;
                         }
                         break;
@@ -385,27 +391,31 @@ public class OnlinePlayScreen implements Screen, Runnable {
                         switch (preDirect[kkk]) {
                             case KeyEvent.VK_LEFT:
                                 for (int i = 1; i < 6 && playerPoints[kkk][0] - getScrollX() - i >= 0; ++i)
-                                    terminal.write((char) 161, playerPoints[kkk][0] - getScrollX() - i,
-                                            playerPoints[kkk][1] - getScrollY(),
-                                            AsciiPanel.fromPic);
+                                    if (canSee(playerPoints[kkk][0] - i, playerPoints[kkk][1]))
+                                        terminal.write((char) 161, playerPoints[kkk][0] - getScrollX() - i,
+                                                playerPoints[kkk][1] - getScrollY(),
+                                                AsciiPanel.fromPic);
                                 break;
                             case KeyEvent.VK_RIGHT:
                                 for (int i = 1; i < 6 && playerPoints[kkk][0] - getScrollX() + i < screenWidth; ++i)
-                                    terminal.write((char) 163, playerPoints[kkk][0] - getScrollX() + i,
-                                            playerPoints[kkk][1] - getScrollY(),
-                                            AsciiPanel.fromPic);
+                                    if (canSee(playerPoints[kkk][0] + i, playerPoints[kkk][1]))
+                                        terminal.write((char) 163, playerPoints[kkk][0] - getScrollX() + i,
+                                                playerPoints[kkk][1] - getScrollY(),
+                                                AsciiPanel.fromPic);
                                 break;
                             case KeyEvent.VK_UP:
                                 for (int i = 1; i < 6 && playerPoints[kkk][1] - getScrollY() - i >= 0; ++i)
-                                    terminal.write((char) 162, playerPoints[kkk][0] - getScrollX(),
-                                            playerPoints[kkk][1] - getScrollY() - i,
-                                            AsciiPanel.fromPic);
+                                    if (canSee(playerPoints[kkk][0], playerPoints[kkk][1] - i))
+                                        terminal.write((char) 162, playerPoints[kkk][0] - getScrollX(),
+                                                playerPoints[kkk][1] - getScrollY() - i,
+                                                AsciiPanel.fromPic);
                                 break;
                             case KeyEvent.VK_DOWN:
                                 for (int i = 1; i < 6 && playerPoints[kkk][1] - getScrollY() + i < screenHeight; ++i)
-                                    terminal.write((char) 160, playerPoints[kkk][0] - getScrollX(),
-                                            playerPoints[kkk][1] - getScrollY() + i,
-                                            AsciiPanel.fromPic);
+                                    if (canSee(playerPoints[kkk][0], playerPoints[kkk][1] + i))
+                                        terminal.write((char) 160, playerPoints[kkk][0] - getScrollX(),
+                                                playerPoints[kkk][1] - getScrollY() + i,
+                                                AsciiPanel.fromPic);
                                 break;
                         }
                         break;
@@ -418,31 +428,18 @@ public class OnlinePlayScreen implements Screen, Runnable {
                             for (int j = 0; j < rr; ++j) {
                                 if (i == 0 && j == 0)
                                     continue;
-                                try {
-                                    if (xx + j < screenWidth && xx + j >= 0 && yy + i < screenHeight && yy + i >= 0)
-                                        terminal.write((char) 164, xx + j, yy + i, AsciiPanel.fromPic);
-                                } catch (Exception e) {
-                                    System.out.println(e);
-                                }
-                                try {
-                                    if (xx + j < screenWidth && xx + j >= 0 && yy - i < screenHeight && yy - i >= 0)
-                                        terminal.write((char) 164, xx + j, yy - i, AsciiPanel.fromPic);
-                                } catch (Exception e) {
-                                    System.out.println(e);
-                                }
-                                try {
-                                    if (xx - j < screenWidth && xx - j >= 0 && yy + i < screenHeight && yy + i >= 0)
-                                        terminal.write((char) 164, xx - j, yy + i, AsciiPanel.fromPic);
-                                } catch (Exception e) {
-                                    System.out.println(e);
-                                }
-                                try {
-                                    if (xx - j < screenWidth && xx - j >= 0 && yy - i < screenHeight && yy - i >= 0)
-                                        terminal.write((char) 164, xx - j, yy - i, AsciiPanel.fromPic);
-                                } catch (Exception e) {
-                                    System.out.println(e);
-                                }
-
+                                if (xx + j < screenWidth && xx + j >= 0 && yy + i < screenHeight && yy + i >= 0
+                                        && canSee(xx + j, yy + i))
+                                    terminal.write((char) 164, xx + j, yy + i, AsciiPanel.fromPic);
+                                if (xx + j < screenWidth && xx + j >= 0 && yy - i < screenHeight && yy - i >= 0
+                                        && canSee(xx + j, yy - i))
+                                    terminal.write((char) 164, xx + j, yy - i, AsciiPanel.fromPic);
+                                if (xx - j < screenWidth && xx - j >= 0 && yy + i < screenHeight && yy + i >= 0
+                                        && canSee(xx - j, yy + i))
+                                    terminal.write((char) 164, xx - j, yy + i, AsciiPanel.fromPic);
+                                if (xx - j < screenWidth && xx - j >= 0 && yy - i < screenHeight && yy - i >= 0
+                                        && canSee(xx - j, yy - i))
+                                    terminal.write((char) 164, xx - j, yy - i, AsciiPanel.fromPic);
                             }
                         }
                         break;
