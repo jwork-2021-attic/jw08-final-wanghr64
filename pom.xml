@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>java2021</groupId>
-  <artifactId>jw08-server</artifactId>
+  <artifactId>jw08-client</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <name>jw08</name>
@@ -30,6 +30,10 @@
     <pluginManagement>
       <!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+        </plugin>
         <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
@@ -45,17 +49,13 @@
           <version>3.8.0</version>
         </plugin>
         <plugin>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.22.1</version>
-        </plugin>
-        <plugin>
           <artifactId>maven-jar-plugin</artifactId>
           <version>3.0.2</version>
           <configuration>
             <archive>
               <manifest>
                 <addClasspath>true</addClasspath>
-                <mainClass>java2021.server.ServerMain</mainClass>
+                <mainClass>java2021.ApplicationMain</mainClass>
               </manifest>
             </archive>
           </configuration>
