@@ -1,0 +1,108 @@
+@startuml screens
+
+interface Screen {
+    +void displayOutput(AsciiPanel terminal)
+    +Screen respondToUserInput(KeyEvent key)
+}
+
+class RestartScreen {}
+
+class StartScreen {}
+
+class ConnectionFailureScreen {}
+
+class LoseScreen {}
+
+class OtherWinScreen {}
+
+class WinScreen {}
+
+class PlayScreen {
+    - World world
+    - Player player
+    - int screenWidth
+    - int screenHeight
+
+    - void createCreatures()
+    - void createBonusus()
+    - void createWorld()
+    - void displayTiles()
+    - void displayCoolTime()
+    - void displaySkill()
+    + int getScrollX()
+    + int getScrollY()
+}
+
+class SaveLoadScreen {
+    # Screen preScreen
+    # int curSelected
+    # File[] save
+}
+
+class SaveScreen {}
+
+class LoadScreen {}
+
+class HelpScreen {
+    - List<String> lines
+    - int leftBound
+    - int upBound
+    - int downBound
+    - int scroll
+    - boolean isEnd
+    - StartScreen ss
+}
+
+class OnlinePlayScreen {
+    - SocketChannel client
+
+    - int myIndex
+
+    - int[] curCoolTime
+    - boolean[] validAIs
+    - boolean[] onSkill
+    - int[] preDirect
+    + int xx
+    + int yy
+    - int HP
+    - int[] icurAI
+    + int myCurAI
+    - int digCount
+    - int[][] playerPoints
+    - final int worldWidth
+    - final int worldHeight
+    - ConcurrentLinkedDeque<int[]> wall
+    - ConcurrentLinkedDeque<int[]> creature
+    - ConcurrentLinkedDeque<int[]> bonus
+    - ConcurrentLinkedDeque<int[]> bullet
+
+    - boolean won
+    - boolean lost
+    - boolean disconnected
+    - int wonIndex
+
+    - int screenWidth
+    - int screenHeight
+
+    + static ConcurrentLinkedDeque<int[]> twoBytes2List()
+    + static ConcurrentLinkedDeque<int[]> threeBytes2List()
+    - void infoParse()
+    - void skillParse()
+}
+
+
+RestartScreen --|> Screen
+StartScreen --|> RestartScreen
+ConnectionFailureScreen --|> RestartScreen
+LoseScreen --|> RestartScreen
+OtherWinScreen --|> RestartScreen
+WinScreen --|> RestartScreen
+PlayScreen --|> Screen
+SaveLoadScreen --|> Screen
+SaveScreen --|> SaveLoadScreen
+LoadScreen --|> SaveLoadScreen
+HelpScreen --|> Screen
+OnlinePlayScreen --|> Screen
+
+
+@enduml

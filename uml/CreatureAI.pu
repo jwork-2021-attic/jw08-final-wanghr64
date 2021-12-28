@@ -1,0 +1,64 @@
+@startuml CreatureAI
+
+class CreatureAI {
+    # Creature creature
+    # World world
+
+    # boolean onSkill
+    # boolean freeze
+
+    + boolean onSkill() 
+
+    + boolean freeze() 
+
+    + void onEnter() 
+
+    + void onUpdate() 
+
+    + boolean canSee() 
+}
+
+class EnemyAI {
+    # Random rd
+    # Player player
+    # boolean[][] visited
+    # Point[][] prePoint
+    # Deque<Point> route
+    # {static} int[] dx 
+    # {static} int[] dy 
+    # int dstX
+    # int dstY
+
+    # void bfsRouter()
+}
+
+class BulletEnemyAI {}
+class BombEnemyAI {}
+
+class PlayerAI {
+    # Player player
+    # boolean allSee
+    + boolean getBonus()
+}
+
+class OldManAI {}
+class PowerBrotherAI {}
+class FireBrotherAI {}
+class ViewBrotherAI {}
+class WaterBrotherAI {}
+class SteelBrotherAI {}
+class HideBrotherAI {}
+
+PlayerAI --|> CreatureAI
+EnemyAI --|> CreatureAI
+BulletEnemyAI --|> EnemyAI
+BombEnemyAI --|> EnemyAI
+OldManAI --|> PlayerAI
+PowerBrotherAI --|> PlayerAI
+FireBrotherAI --|> PlayerAI
+ViewBrotherAI --|> PlayerAI
+WaterBrotherAI --|> PlayerAI
+SteelBrotherAI --|> PlayerAI
+HideBrotherAI --|> PlayerAI
+
+@enduml

@@ -1,0 +1,59 @@
+@startuml creature
+
+class Creature {
+    + int preDirect
+    - World world
+    - int x
+    - int y
+    + void X()
+    + void Y()
+    + void setX()
+    + void setY()
+    - char glyph
+    + char glyph()
+    + void setGlyph()
+    - Color color
+    + Color color()
+    + void setColor()
+    # CreatureAI ai
+    + void setAI()
+    + void startAI()
+    - int maxHP
+    + int maxHP()
+    - int HP
+    + int HP()
+    + boolean modifyHP()
+    - int attackValue
+    + int attackValue()
+    - int defenseValue
+    + int defenseValue()
+    - int visionRadius
+    + int visionRadius()
+    + boolean canSee()
+    + boolean moveBy()
+    + void attack()
+    + boolean canEnter()
+}
+
+class Player {
+    + int index
+    + int digCount
+
+    + boolean win
+
+    + boolean isVisible
+
+    + boolean[] validAIs
+    + int iCurAI
+    - PlayerAI[] myAIs
+    - List<String> messages
+
+    + int[] curCoolTime
+    +  int[] maxCoolTime
+    +  int[] costCoolTime
+
+}
+
+Player --|> Creature
+
+@enduml
