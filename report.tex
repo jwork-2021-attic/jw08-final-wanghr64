@@ -1,0 +1,333 @@
+\documentclass{SCIS2022cn}
+\begin{document}
+\ArticleType{报告}
+%\SpecialTopic{}
+%\Luntan{中国科学院学部\quad 科学与技术前沿论坛}
+\Year{2022}
+\Vol{52}
+\No{1}
+\BeginPage{1}
+\DOI{}
+\ReceiveDate{}
+\ReviseDate{}
+\AcceptDate{}
+\OnlineDate{}
+\AuthorMark{}
+\AuthorCitation{}
+\enAuthorCitation{}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Developing a Java Game from Scratch}{引用的标题}
+\author[]{191220107 王皓冉}{191220107 王皓冉}{239955612@qq.com}
+\maketitle
+
+\section{开发目标}
+实现四人联机对战像素风游戏。
+
+\subsection{游戏规则}
+玩家身为爷爷不断收集宝箱，解锁新的具有特殊能力的葫芦娃。期间与怪物敌人进行战斗，并获取道具恢复体力和生命值，以及获取可以挖掘墙壁的能力。
+
+当爷爷收集到了所有宝箱，即集齐了所有葫芦娃之后，锦旗将随机生成在地图中，最先获取锦旗的玩家将夺得胜利。
+
+\subsection{灵感来源}
+来自于《PUBG》等游戏，即玩家在游戏的开始一无所有，在游戏的过程中不断获取道具强化自己，并且零和游戏使得只有最快完成目标的玩家可以胜出。
+
+
+\section{设计理念}
+\subsection{总体设计}
+程序的总体设计如图\ref{fig1}所示。
+
+在原有的AsciiPanel给出的RogueLike分支的基础上：
+\begin{itemize}
+    \item 对于处理用户键盘输入和屏幕输出的Screen类没有进行太大的改动，除了简单的功能选择界面之外，OnlinePlayScreen是独创性最高的一个Screen子类。
+    \item 对于游戏核心实现的Creature类和CreatureAI类进行了自己的自定义：增加了Player类作为Creature的子类，用于描述玩家角色所特有的一些特点；增加了PlayerAI类及其众多派生类（老爷爷和葫芦娃的AI），以及增加了EnemyAI类及其派生类（远程攻击怪物和自爆怪物）。
+    \item 添加了MyServer类，用于实现网络通信对战。
+\end{itemize}
+
+以下将以Screen类及其派生类、Creature类及其派生类、CreatureAI类及其派生类、MyServer类为角度，对具体的实现细节进行说明。
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics*[width=0.9\textwidth]{pics/brief.png}
+\caption{总体设计}
+\label{fig1}
+\end{figure}
+
+\subsection{Screen类}
+
+Screen及其派生类的继承关系和主要成员变量、成员方法如图\ref{fig2}所示。
+
+\begin{figure}[!t]
+\centering
+\includegraphics*[width=0.9\textwidth]{pics/screen.png}
+\caption{Screen及其派生类}
+\label{fig2}
+\end{figure}
+
+其中大多数子类都只有：
+\begin{itemize}
+    \item 屏幕输出
+    \item 处理简单的用户键盘输入
+\end{itemize}
+两个简单功能，因此不再赘述。这里只对有更加复杂实现的类进行详细说明。
+
+\subsubsection{RestartScreen}
+所有RestartScreen的派生类都有相同的特点：即按下回车键之后，都会回到StartScreen，因此其中的respondToUserInput实现都是相同的。
+
+\subsubsection{SaveLoadScreen}
+用于本地的存档和读档，因此涉及到了文件的IO操作。
+
+\subsubsection{PlayScreen}
+与其他Screen类不同，PlayScreen类是相对“胖”的。其中维护了World类和Player类的对象，并且定义了许多更加细分的屏幕打印函数。同时用户的输入也有了更多的细化，如移动位置和释放技能等等。
+
+同时由于其维护了一场本地游戏所有的全部状态，因此本地存档就可以通过序列化一个PlayScreen实现。最终的存档大小大约在800kB-900kB左右。对于本地的磁盘IO来说开销很小，但是对于网络通信每秒要更新几十次的高速IO来说（而且又是使用NIO Selector的非阻塞方式），序列化这样一个庞大的类显然并不合适。
+
+\subsubsection{OnlinePlayScreen}
+专门由于联机游戏的Screen派生类。其可以处理的用户输入和PlayScreen大致相同（即控制自己玩家的各种操作），并且打印在屏幕的内容也与PlayScreen并无二致，但是内部的实现却有着非常大的区别。
+
+OnlinePlayScreen是一个更加“轻”的客户端，本身并不维护任何状态，所有的游戏信息都是通过网络IO得到的\emph{字节缓冲}，内部私有的字节缓冲处理函数可以从中提取到游戏信息，最终将这些字节信息而不是序列化的对象通过网络进行传输。所有的用户输入都会变成放入相应的字节缓冲区，并发送给服务器；所有的屏幕输出都来自服务器，从字节缓冲池中取出。
+
+\subsection{Creature及其派生类}
+
+Creature及其派生类的继承关系和主要成员变量、成员方法如图\ref{fig3}所示。
+
+\begin{figure}[!t]
+\centering
+\includegraphics*[width=0.15\textwidth]{pics/creature.png}
+\caption{Creature及其派生类}
+\label{fig3}
+\end{figure}
+
+Creature类包含了生物体（包括敌人和玩家）的所有\emph{状态信息},如：
+\begin{itemize}
+    \item 坐标值x和y
+    \item 生命值HP
+    \item 攻击力attackValue
+    \item 防御力defenseValue
+    \item 可视范围visionRadius
+    \item 所持有的CreatureAI对象
+\end{itemize}
+
+而Player作为Creature的派生类，在Creature的基础上，添加了玩家所特有的状态信息，如：
+\begin{itemize}
+    \item 多人游戏中的下标索引
+    \item 冷却时间
+    \item 是否可见（对应葫芦娃的隐身技能）
+    \item 多个PlayerAI对象（葫芦娃形态的切换）
+\end{itemize}
+
+\subsection{CreatureAI及其派生类}
+
+CreatureAI及其派生类的继承关系和主要成员变量、成员方法如图\ref{fig4}所示。
+
+\begin{figure}[!t]
+\centering
+\includegraphics*[width=0.9\textwidth]{pics/creatureAI.png}
+\caption{CreatureAI及其派生类}
+\label{fig4}
+\end{figure}
+
+CreatureAI提供了生物体特有的行为特征方法，以及内部的非状态信息。同时CreatureAI继承了Thread类，即每一个CreatureAI最后都会在独立的线程生运行，实现了多个生物体行为的并发。
+
+PlayerAI作为CreatureAI的派生类，其中有着玩家特有的，但又是多个葫芦娃所共有的行为特征，如：
+\begin{itemize}
+    \item 获得道具的处理
+\end{itemize}
+
+其他PlayerAI的派生类，主要是实现了Thread的run接口，以体现不同葫芦娃的独特技能，如：
+\begin{itemize}
+    \item 大娃近距离攻击
+    \item 二娃解锁视野
+    \item 三娃火焰攻击
+    \item ……
+\end{itemize}
+
+EnemyAI作为CreatureAI的派生类，其中有着敌人怪物所特有的行为特征，如：
+\begin{itemize}
+    \item 通过给定的玩家对象，使用BFS算法得到最短路径
+\end{itemize}
+
+不同的EnemyAI的派生类，主要是实现了Thread的run接口，以体现不同敌人怪物的独特功能，如：
+\begin{itemize}
+    \item 远距离攻击怪物可以射出火焰子弹
+    \item 自爆怪物会快速靠近玩家并自爆产生伤害
+\end{itemize}
+
+\subsection{MyServer类}
+MyServer类要完成以下的功能：
+\begin{itemize}
+    \item 维护和更新游戏状态
+    \item 处理用户输入
+    \item 将游戏状态打包，发送给客户端
+\end{itemize}
+
+以下就将以这三个功能，分别对MyServer类进行说明。
+\subsubsection{维护游戏状态}
+MyServer类维护游戏状态的方法，和PlayScreen类的大体逻辑相同，不同点在于：
+\begin{itemize}
+    \item 要处理多个玩家的信息
+    \item 生成怪物时，随机选择玩家作为怪物的攻击对象
+\end{itemize}
+
+\subsubsection{处理用户输入}
+MyServer类处理用户输入的方法，和PlayScreen类的respondToUserInput函数大致相同。不同之处在于：
+\begin{itemize}
+    \item respondToUserInput处理单用户的输入，MyServer类需要加入额外的用户标签信息
+    \item respondToUserInput的输入来源是KeyEvent事件，而MyServer类的输入来源是来自网络IO的字节缓冲
+\end{itemize}
+
+\subsubsection{通信包定义}
+
+通信包分为以下几个种类：
+\begin{itemize}
+    \item 自己控制的玩家信息
+    \item 地图（墙壁）位置信息
+    \item 生物体（敌人和玩家）种类和位置信息
+    \item 道具种类和位置信息
+    \item 子弹方向和位置信息
+    \item 玩家的技能信息
+\end{itemize}
+
+\paragraph{自己控制的玩家信息}
+
+通信包结构如图\ref{fig5}所示。
+
+该通信包的长度为定长19字节（包头不计算在内）
+
+\paragraph{地图位置信息}
+通信包结构如图\ref{fig6}所示。
+
+该通信包的长度不定，因此加入了4字节的整型数，用于指示包的长度（二元组的个数，不是字节数，不包括包头）。
+
+\paragraph{生物体种类和位置信息}
+
+通信包结构如图\ref{fig7}所示。
+
+该通信包的长度不定，因此加入了4字节的整型数，用于指示包的长度（三元组的个数，不是字节数，不包括包头）。
+
+\paragraph{道具种类和位置信息}
+
+通信包结构如图\ref{fig8}所示。
+
+该通信包的长度不定，因此加入了4字节的整型数，用于指示包的长度（三元组的个数，不是字节数，不包括包头）。
+
+\paragraph{子弹方向和位置信息}
+
+通信包结构如图\ref{fig9}所示。
+
+该通信包的长度不定，因此加入了4字节的整型数，用于指示包的长度（三元组的个数，不是字节数，不包括包头）。
+
+\paragraph{玩家技能信息}
+
+通信包结构如图\ref{fig10}所示。
+
+该通信包的长度为定长20字节（包头不计算在内）.
+
+\begin{figure}[!t]
+\centering
+\includegraphics*[width=0.8\textwidth]{pics/infoPackage.png}
+\caption{玩家信息通信包格式}
+\label{fig5}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics*[width=0.8\textwidth]{pics/wallPackage.png}
+\caption{地图信息通信包格式}
+\label{fig6}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics*[width=0.8\textwidth]{pics/creaturePackage.png}
+\caption{地图信息通信包格式}
+\label{fig7}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics*[width=0.8\textwidth]{pics/bonusPackage.png}
+\caption{道具信息通信包格式}
+\label{fig8}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics*[width=0.8\textwidth]{pics/bulletPackage.png}
+\caption{子弹信息通信包格式}
+\label{fig9}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics*[width=0.8\textwidth]{pics/skillPackage.png}
+\caption{玩家技能信息通信包格式}
+\label{fig10}
+\end{figure}
+
+\section{技术问题}
+\subsection{网络通信的方式}
+在完成了本地的存档（磁盘文件IO）之后，认识到了网络通信也不过是另一个封装成IO的方式。在本地存档中使用了Java自带的对象序列化功能，其对于循环引用的处理也无需再进行额外处理，十分方便。但是在网络通信中，尝试使用对象序列化进行发包之后，遇到了以下的问题：
+
+\begin{enumerate}
+    \item NIO Selector使用非阻塞的通信方式，数据的操作对象是Buffer而不是Stream。这样就使得ObjectStream的对象序列化方式需要进行一定的额外处理。
+    \item 使用对象序列化得到的数据包体积过大，使得在远程主机上部署Server根本无法正常运行，只有在本地的回环地址上才可以勉强低刷新率运行。
+    \item 对象序列化带来了低容错度，传输过程中的一点差错都会使得客户端无法对数据包进行反序列化。大体积的数据包又使得错误出现的次数提升了许多。
+\end{enumerate}
+
+作为解决方案，最终采用了设计理念中提到的，MyServer自定义数据包的方式。在服务端和客户端都额外添加了封装通信包、拆解通信包的方法，虽然代码量上升，但是带来了以下的好处：
+\begin{enumerate}
+    \item 封装通信包、拆解通信包都是对于byte[]，即字节数组的操作。而ByteBuffer和byte[]之间的转换是很自然的。
+    \item 自定义字节序列化方式之后，通信包的体积明显减少。实际测量，在20Hz的更新频率下，四个玩家同时进行游戏，服务端的网络上行速率大约在400kB/s。完全是可以接受的范围。
+    \item 采用自定义字节序列化方式，网络传输的容错率得到了很大的提升，甚至可以直接忽略单个字节的错误（反应到客户端的屏幕输出上的时间很短，几乎立刻就会被下一个正确的数据包所覆盖）
+\end{enumerate}
+
+\subsection{PlayScreen的臃肿问题}
+由于PlayScreen直接接管了用户输入和屏幕输出，在其上直接维护游戏的状态似乎是最自然的（不需要考虑访问限制，效率似乎也是最高的）。在本地游戏中一个“胖”的PlayScreen和相对“瘦”的World、Creature、CreatureAI类最后证实也是可以正常工作的。
+
+但是在网络通信中，由于Screen的实现使用了瘦客户端OnlinePlayerScreen类，因此应该将更多地游戏状态转移到游戏“Model”类如World、Creature、CreatureAI类中，而不是在一个“View”类PlayScreen中。如将冷却时间int[] coolTime转移到了Player类中。
+
+\subsection{多线程并发问题}
+每一个生物体都占用着一个线程，大量的线程并发看似会带来不小的开发难度，但是实际上这些线程的并发模式十分简单：对于临界区的写入非常少（只有玩家修改World中的墙壁Tile），绝大多数对于临界区的操作都是读取。
+
+因此处理多线程并发的策略相对简单，主要有以下几种：
+\begin{enumerate}
+    \item 使用并发容器。尤其是ConcurrentLinkedDeque类。ConcurrentLinkedDeque类最终的呈现效果是\emph{弱一致性}，对于本程序的并发模式来说已经足够了。
+    \item 对于较高频次写入同时的较长时间的读取操作（即OnlinePlayScreen的displayScreen），使用synchronized操作进行原子化。
+\end{enumerate}
+
+\section{工程问题}
+开发工具使用的是Visua Studio Code，较短的学习周期和相对轻量的开发环境，在大作业开发前期体现出了简单高效的特点。但是在开发后期的自动构建工具和单元测试部署上，就体现出了许多的不便之处。
+
+\subsection{Maven的使用}
+Maven的初始化在Visual Studio Code中是一键生成的，但是在实际的部署过程中还是出现了许多问题
+\subsubsection{jar包的导出}
+在使用mvn package导出了jar包之后，直接使用鼠标双击运行没有反应，使用命令行运行之后发现报告“无法加载主类”的错误。
+
+解决方法是，在maven-jar-plugin的插件配置中，加入<mainClass>属性块。
+
+\subsubsection{资源文件的使用}
+Maven默认将资源文件路径设为./src/main/resources目录下。但是在加载时直接使用File对象加载对应路径，发现无法正确获得资源文件的信息，并抛出IOException异常。
+
+解决方法是，Maven实际上将资源文件也放到了class path之中，加载资源应该使用类加载器的机制。即使用getClassLoader().getResource()函数来加载Maven管理下的外部文件资源。
+
+\subsection{单元测试部署}
+单元测试在部署的过程中，遇到了一系列的问题，如：
+\begin{enumerate}
+    \item Visual Studio Code中的Coverage Gutters插件和Maven的配合使用问题
+    \item 使用专门的测试类测试main中的实际工程文件，所遇到的包访问权限问题
+    \item 对于耦合度较高的，且产生了副作用的方法，如何构造测试用例的问题
+\end{enumerate}
+
+对于问题1仅仅是工具的使用问题，可以通过查看插件的文档得以解决；对于问题2，可以通过较为“暴力”的方法解决，即将需要测试的所有方法的包访问限制设为public，但是这样会破坏整体的一致性；对于问题3，只能将整个工程的代码进行一个较大程度的重构，由于时间关系没有并没有如此进行。因此最后单元测试并没有达到50\%的高覆盖率。
+
+
+
+\section{课程感言}
+Java作为一种编程语言本身，好用的地方可能就是有着大量的第三方库可以使用。在实际应用的开发过程中（在这个大作业中尤其是网络通信和UI的框架），找到一个成熟和灵活的第三方库，要远远比起自己再造轮子要高效和有成果的多。
+
+这门课作为一门将编程语言作为主题的课程（即使有着“高级”二字），大量的调包似乎并不能够对语言的特性和更加通用的工程管理方式有进一步更深层的认识和理解。因此希望比起最后比拼谁最后的成果更加“酷炫”，甚至不惜使用成熟的第三方游戏引擎，在给定框架下的（也不能完全不用第三方库）自己程序的自洽和优雅可能是更重要的。
+
+
+\end{document}
