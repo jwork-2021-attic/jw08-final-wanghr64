@@ -69,8 +69,6 @@ public class OnlinePlayScreen implements Screen, Runnable {
         String stats = String.format("%3d/%3d hp %2d digs", HP,
                 100, digCount);
         terminal.write(stats, 1, 16);
-        terminal.write(Integer.toString(myCurAI), 26, 16);
-        terminal.write(onSkill[myIndex] ? "True" : "False", 28, 16);
         // Cool Times
         displayCoolTime(terminal);
 
